@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance and Wealth Over Time</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-bg: #1e1e2f;
+            --card-bg: #252540;
+            --text-primary: #d0d2d6;
+            --text-secondary: #a1a5b7;
+            --accent: #7367f0;
+            --border: #3b3b5a;
+            --button-bg: #7367f0;
+            --button-hover: #5a4dc3;
+            --table-hover: #2a2a45;
+            --chart-bg: #252540;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        nav {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo2 img{
+            filter: brightness(0) invert(1);
+        }
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 20px;
+        }
+        nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        nav a img {
+            width: 16px;
+            height: 16px;
+        }
+        nav a:hover {
+            background-color: var(--table-hover);
+        }
+        .container {
+            max-width: 1500px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+        h1, h2 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .balance {
+            text-align: center;
+            font-size: 2em;
+            color: #28c76f;
+            margin: 30px 0;
+        }
+        .filter-form {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        label {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+        }
+        input {
+            background-color: var(--primary-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+        button {
+            background-color: var(--button-bg);
+            border: none;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button img {
+            filter: brightness(0) invert(1);
+            width: 16px;
+            height: 16px;
+        }
+        button:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+        }
+        .chart-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--chart-bg);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        @media (max-width: 768px) {
+            .filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .logo img {
+                margin-bottom: 10px;
+            }
+            .chart-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}" class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+        </a>
+        <ul>
+            <li><a href="{{ url_for('index') }}" class="logo2"><img src="{{ url_for('static', filename='images/upload-icon.png') }}" alt="Upload Icon"> Upload</a></li>
+            <li><a href="{{ url_for('manage') }}" class="logo2"><img src="{{ url_for('static', filename='images/manage-icon.png') }}" alt="Manage Icon"> Manage</a></li>
+            <li><a href="{{ url_for('balance') }}" class="logo2"><img src="{{ url_for('static', filename='images/balance-icon.png') }}" alt="Balance Icon"> Balance</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="card">
+            <h1>Balance and Wealth Over Time</h1>
+            <div class="balance">
+                <h2>Current Balance: ${{ balance|round(2) }}</h2>
+            </div>
+            <h2>Wealth Over Time</h2>
+            <form class="filter-form" id="chart-filter">
+                <label for="start_date">From:</label>
+                <input type="date" name="start_date" id="start_date" value="{{ start_date }}">
+                <label for="end_date">To:</label>
+                <input type="date" name="end_date" id="end_date" value="{{ end_date }}">
+                <button type="button" onclick="updateChart()">
+                    <img src="{{ url_for('static', filename='images/refresh-icon.png') }}" alt="Refresh Icon"> Update Chart
+                </button>
+            </form>
+            <div class="chart-container">
+                <canvas id="wealthChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart;
+        function updateChart() {
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+
+            fetch('/wealth-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `start_date=${startDate}&end_date=${endDate}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('wealthChart').getContext('2d');
+                if (chart) chart.destroy();
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Wealth',
+                            data: data.amounts,
+                            borderColor: '#7367f0',
+                            fill: false,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: true, labels: { color: '#d0d2d6' } },
+                            title: { display: true, text: 'Wealth Over Time', color: '#ffffff', font: { size: 16 } }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'Date', color: '#d0d2d6' }, grid: { color: '#3b3b5a' } },
+                            y: { title: { display: true, text: 'Amount ($)', color: '#d0d2d6' }, grid: { color: '#3b3b5a' } }
+                        }
+                    }
+                });
+            });
+        }
+        window.onload = updateChart;
+        setInterval(updateChart, 10000);
+    </script>
+</body>
+</html>

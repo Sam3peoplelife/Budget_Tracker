@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Transactions</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-bg: #1e1e2f;
+            --card-bg: #252540;
+            --text-primary: #d0d2d6;
+            --text-secondary: #a1a5b7;
+            --accent: #7367f0;
+            --border: #3b3b5a;
+            --button-bg: #7367f0;
+            --button-hover: #5a4dc3;
+            --table-hover: #2a2a45;
+            --chart-bg: #252540;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        nav {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo2 img{
+            filter: brightness(0) invert(1);
+        }
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 20px;
+        }
+        nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        nav a img {
+            width: 16px;
+            height: 16px;
+        }
+        nav a:hover {
+            background-color: var(--table-hover);
+        }
+        .container {
+            max-width: 1500px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 30px;
+        }
+        .left-column {
+            flex: 2;
+        }
+        .right-column {
+            flex: 1;
+        }
+        .card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #ffffff;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        label {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+        }
+        input {
+            background-color: var(--primary-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+        button, input[type="submit"], input[type="button"] {
+            background-color: var(--button-bg);
+            border: none;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button img, input[type="submit"] img, input[type="button"] img {
+            filter: brightness(0) invert(1);
+            width: 16px;
+            height: 16px;
+        }
+        button:hover, input[type="submit"]:hover, input[type="button"]:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            font-size: 0.9em;
+        }
+        th {
+            background-color: var(--card-bg);
+            color: #ffffff;
+            font-weight: 600;
+        }
+        td {
+            background-color: var(--card-bg);
+        }
+        tr:hover td {
+            background-color: var(--table-hover);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .chart-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: var(--chart-bg);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .filter-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .no-data {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 30px;
+            font-size: 1em;
+        }
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+            }
+            .chart-container {
+                max-width: 100%;
+            }
+        }
+        @media (max-width: 768px) {
+            .form-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .logo img {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}" class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+        </a>
+        <ul>
+            <li><a href="{{ url_for('index') }}" class="logo2"><img src="{{ url_for('static', filename='images/upload-icon.png') }}" alt="Upload Icon"> Upload</a></li>
+            <li><a href="{{ url_for('manage') }}" class="logo2"><img src="{{ url_for('static', filename='images/manage-icon.png') }}" alt="Manage Icon"> Manage</a></li>
+            <li><a href="{{ url_for('balance') }}" class="logo2"><img src="{{ url_for('static', filename='images/balance-icon.png') }}" alt="Balance Icon"> Balance</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="left-column">
+            <div class="card">
+                <h2>Add Transaction</h2>
+                <form action="/add" method="post" class="form-group">
+                    <label for="date">Date:</label>
+                    <input type="date" name="date" id="date" required>
+                    <label for="title">Title:</label>
+                    <input type="text" name="title" id="title" required>
+                    <label for="amount">Amount:</label>
+                    <input type="number" name="amount" id="amount" step="0.01" required>
+                    <label for="category">Category:</label>
+                    <input type="text" name="category" id="category" required placeholder="Enter category">
+                    <button type="submit">
+                        <img src="{{ url_for('static', filename='images/add-icon.png') }}" alt="Add Icon"> Add
+                    </button>
+                </form>
+            </div>
+            <div class="card">
+                <h2>Transactions</h2>
+                {% if transactions %}
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Title</th>
+                        <th>Amount</th>
+                        <th>Category</th>
+                        <th>Actions</th>
+                    </tr>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction[0] }}</td>
+                        <td>
+                            <form action="/update/{{ transaction[0] }}" method="post">
+                                <input type="date" name="date" value="{{ transaction[1] }}" required>
+                        </td>
+                        <td>
+                                <input type="text" name="title" value="{{ transaction[2] }}" required>
+                        </td>
+                        <td>
+                                <input type="number" name="amount" value="{{ transaction[3] }}" step="0.01" required>
+                        </td>
+                        <td>
+                                <input type="text" name="category" value="{{ transaction[4] }}" required placeholder="Enter category">
+                        </td>
+                        <td class="action-buttons">
+                                <button type="submit">
+                                    <img src="{{ url_for('static', filename='images/update-icon.png') }}" alt="Update Icon"> Update
+                                </button>
+                            </form>
+                            <form action="/delete/{{ transaction[0] }}" method="post">
+                                <button type="submit">
+                                    <img src="{{ url_for('static', filename='images/delete-icon.png') }}" alt="Delete Icon"> Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <p class="no-data">No transactions found.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="right-column">
+            <div class="card">
+                <h2>Expenses by Category</h2>
+                <form class="filter-form" id="chart-filter">
+                    <div class="form-group">
+                        <label for="start_date">From:</label>
+                        <input type="date" name="start_date" id="start_date" value="{{ start_date }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="end_date">To:</label>
+                        <input type="date" name="end_date" id="end_date" value="{{ end_date }}">
+                    </div>
+                    <button type="button" onclick="updateChart()">
+                        <img src="{{ url_for('static', filename='images/refresh-icon.png') }}" alt="Refresh Icon"> Update Chart
+                    </button>
+                </form>
+                <div class="chart-container">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart;
+        function updateChart() {
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+
+            fetch('/chart-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `start_date=${startDate}&end_date=${endDate}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('expenseChart').getContext('2d');
+                if (chart) chart.destroy();
+                chart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.amounts,
+                            backgroundColor: ['#7367f0', '#28c76f', '#ea5455', '#ff9f43', '#1e88e5', '#9c27b0'],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top', labels: { color: '#d0d2d6' } },
+                            title: { display: true, text: 'Expenses by Category', color: '#ffffff', font: { size: 16 } }
+                        }
+                    }
+                });
+            });
+        }
+        window.onload = updateChart;
+        setInterval(updateChart, 10000);
+    </script>
+</body>
+</html>

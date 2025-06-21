@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Transactions</title>
+    <style>
+        :root {
+            --primary-bg: #1e1e2f;
+            --card-bg: #252540;
+            --text-primary: #d0d2d6;
+            --text-secondary: #a1a5b7;
+            --accent: #7367f0;
+            --border: #3b3b5a;
+            --button-bg: #7367f0;
+            --button-hover: #5a4dc3;
+            --table-hover: #2a2a45;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        nav {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .image{
+            height: 40px;
+            width: auto;
+        }
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 20px;
+        }
+        nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        nav a:hover {
+            background-color: var(--table-hover);
+        }
+        .container {
+            max-width: 1500px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        .upload-form, .filter-form {
+            margin-bottom: 30px;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        label {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+        }
+        input, select {
+            background-color: var(--primary-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+        button, input[type="submit"] {
+            background-color: var(--button-bg);
+            border: none;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover, input[type="submit"]:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+        }
+        button img, input[type="submit"] img {
+            width: 16px;
+            height: 16px;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            font-size: 0.9em;
+        }
+        th {
+            background-color: var(--card-bg);
+            color: #ffffff;
+            font-weight: 600;
+        }
+        td {
+            background-color: var(--card-bg);
+        }
+        tr:hover td {
+            background-color: var(--table-hover);
+        }
+        .no-data {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 30px;
+            font-size: 1em;
+        }
+        @media (max-width: 768px) {
+            .form-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .logo img {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}" class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+        </a>
+        <ul>
+            <li><a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='images/upload-icon.png') }}" alt="Upload Icon"> Upload</a></li>
+            <li><a href="{{ url_for('manage') }}"><img src="{{ url_for('static', filename='images/manage-icon.png') }}" alt="Manage Icon"> Manage</a></li>
+            <li><a href="{{ url_for('balance') }}"><img src="{{ url_for('static', filename='images/balance-icon.png') }}" alt="Balance Icon"> Balance</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="card">
+            <h1>Upload Transactions</h1>
+            <div class="upload-form">
+                <form action="/upload" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input type="file" name="file" accept=".csv" required>
+                        <input type="submit" value="Upload CSV">
+                            <img src="{{ url_for('static', filename='images/upload-icon.png') }}" alt="Upload Icon">
+                        </input>
+                    </div>
+                </form>
+            </div>
+            <div class="filter-form">
+                <form action="/" method="post">
+                    <div class="form-group">
+                        <label for="category">Category:</label>
+                        <select name="category" id="category">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category }}" {% if category == category_filter %}selected{% endif %}>{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="date">Specific Date:</label>
+                        <input type="date" name="date" id="date" value="{{ date_filter }}">
+                        <label for="start_date">From:</label>
+                        <input type="date" name="start_date" id="start_date" value="{{ start_date }}">
+                        <label for="end_date">To:</label>
+                        <input type="date" name="end_date" id="end_date" value="{{ end_date }}">
+                        <input type="submit" value="Apply Filters">
+                            <img src="{{ url_for('static', filename='images/filter-icon.png') }}" alt="Filter Icon">
+                        </input>
+                    </div>
+                </form>
+            </div>
+            {% if transactions %}
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                </tr>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction[0] }}</td>
+                    <td>{{ transaction[1] }}</td>
+                    <td>{{ transaction[2] }}</td>
+                    <td>{{ transaction[3] }}</td>
+                    <td>{{ transaction[4] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">No transactions found.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
